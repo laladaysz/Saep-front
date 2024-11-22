@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import TaskCard from "./Taskcard"; // Importando o TaskCard
 import "./TaskBoard.css";
 
 function TaskBoard() {
@@ -8,7 +9,6 @@ function TaskBoard() {
     emAndamento: [],
     concluido: [],
   });
-  const [users, setUsers] = useState({}); // Armazena os nomes dos usuários por ID
 
   useEffect(() => {
     const fetchTarefas = async () => {
@@ -23,69 +23,31 @@ function TaskBoard() {
         const concluido = allTarefas.filter((tarefa) => tarefa.status === "Concluído");
 
         setTarefas({ pendente, emAndamento, concluido });
-
-        // Buscar os usuários associados às tarefas
-        const userIds = [...new Set(allTarefas.map((tarefa) => tarefa.user))]; 
-        const userResponses = await Promise.all(
-          userIds.map((id) =>
-            axios.get(`http://127.0.0.1:8000/api/users/${id}/`).then((res) => ({
-              id,
-              nome: res.data.nome,
-            }))
-          )
-        );
-
-        // Mapeia os IDs para nomes
-        const userMap = userResponses.reduce((map, user) => {
-          map[user.id] = user.nome;
-          return map;
-        }, {});
-        setUsers(userMap);
-
       } catch (error) {
-        console.error("Erro ao buscar tarefas ou usuários:", error);
+        console.error("Erro ao buscar tarefas:", error);
       }
     };
 
     fetchTarefas();
   }, []); // Apenas no carregamento inicial
 
-  const renderTarefas = (tasks) =>
-    tasks.map((tarefa) => (
-      <div key={tarefa.id} className="taskboard-card">
-        <h4>{tarefa.titulo}</h4>
-        <p>{tarefa.descricao}</p>
-        <p>
-          <strong>Setor:</strong> {tarefa.setor}
-        </p>
-        <p>
-          <strong>Prioridade:</strong> {tarefa.prioridade}
-        </p>
-        <p>
-            <strong>Responsável:</strong> {users[tarefa.user] || "Carregando..."}
-        </p>
+  // Função para renderizar as colunas de tarefas
+  const renderColumn = (tasks, columnName) => {
+    return (
+      <div className="taskboard-column" key={columnName}>
+        <h3>{columnName}</h3>
+        {tasks.map((tarefa) => (
+          <TaskCard key={tarefa.id} tarefa={tarefa} statusColumn={columnName} />
+        ))}
       </div>
-    ));
+    );
+  };
 
   return (
     <div className="taskboard-container">
-      {/* Coluna Pendente */}
-      <div className="taskboard-column">
-        <h3>Pendente</h3>
-        {renderTarefas(tarefas.pendente)}
-      </div>
-
-      {/* Coluna Em Andamento */}
-      <div className="taskboard-column">
-        <h3>Em Andamento</h3>
-        {renderTarefas(tarefas.emAndamento)}
-      </div>
-
-      {/* Coluna Concluído */}
-      <div className="taskboard-column">
-        <h3>Concluído</h3>
-        {renderTarefas(tarefas.concluido)}
-      </div>
+      {renderColumn(tarefas.pendente, "Pendente")}
+      {renderColumn(tarefas.emAndamento, "Em Andamento")}
+      {renderColumn(tarefas.concluido, "Concluído")}
     </div>
   );
 }
