@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useDrag } from "react-dnd";
+import axios from "axios";
 import "./TaskCard.css";
 
 const TaskCard = ({ tarefa, statusColumn }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
-    item: { id: tarefa.id, status: statusColumn }, // Dados do card para drag
+    item: { id: tarefa.id, status: statusColumn },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -17,7 +17,6 @@ const TaskCard = ({ tarefa, statusColumn }) => {
   useEffect(() => {
     const fetchResponsavel = async () => {
       try {
-        // Fazer a requisição para buscar o usuário responsável
         const response = await axios.get(
           `http://127.0.0.1:8000/api/users/${tarefa.user}/`
         );
@@ -31,7 +30,7 @@ const TaskCard = ({ tarefa, statusColumn }) => {
     if (tarefa.user) {
       fetchResponsavel();
     }
-  }, [tarefa.user]); // Recarrega apenas se o id do usuário mudar
+  }, [tarefa.user]);
 
   return (
     <div
