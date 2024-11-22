@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Register from './components/Register';
-import RegisterTarefa from './components/RegisterTarefa'; // Importando o novo componente de tarefa
+import RegisterTarefa from './components/RegisterTarefa'; 
+import TaskBoard from './components/Taskboard'; 
 
 function App() {
   const [showUserModal, setShowUserModal] = useState(false);
@@ -15,7 +16,7 @@ function App() {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
       <h1 style={{ textAlign: 'center' }}>Bem-vindo ao Sistema</h1>
       
       {/* Botão de Cadastro de Usuário */}
@@ -69,6 +70,12 @@ function App() {
           <RegisterTarefa closeModal={toggleTarefaModal} />
         </div>
       )}
+
+    <div>
+      <h1 style={{ textAlign: "center", marginTop: "20px" }}>Quadro de Tarefas</h1>
+      <TaskBoard />
+    </div>
+  
     </div>
   );
 }
