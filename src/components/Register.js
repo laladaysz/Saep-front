@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function Register() {
+function Register({ closeModal }) {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -14,6 +14,8 @@ function Register() {
         email,
       });
       setMessage(`Usuário cadastrado com sucesso: ${response.data.nome}`);
+      setNome('');
+      setEmail('');
     } catch (error) {
       setMessage(`Erro ao cadastrar: ${error.response?.data?.error || error.message}`);
     }
@@ -21,14 +23,15 @@ function Register() {
 
   return (
     <div>
-      <h2>Cadastro de Usuário</h2>
-      <form onSubmit={handleRegister}>
+      <h2 style={{ textAlign: 'center' }}>Cadastro de Usuário</h2>
+      <form onSubmit={handleRegister} style={{ textAlign: 'center' }}>
         <input
           type="text"
           placeholder="Nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           required
+          style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }}
         />
         <input
           type="email"
@@ -36,10 +39,40 @@ function Register() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          style={{ display: 'block', width: '100%', marginBottom: '10px', padding: '8px' }}
         />
-        <button type="submit">Cadastrar</button>
+        <button
+          type="submit"
+          style={{
+            display: 'block',
+            width: '100%',
+            backgroundColor: '#007BFF',
+            color: 'white',
+            padding: '10px',
+            border: 'none',
+            borderRadius: '4px',
+          }}
+        >
+          Cadastrar
+        </button>
+        <button
+          type="button"
+          onClick={closeModal}
+          style={{
+            display: 'block',
+            marginTop: '10px',
+            width: '100%',
+            backgroundColor: '#f8f9fa',
+            color: '#6c757d',
+            padding: '10px',
+            border: '1px solid #ced4da',
+            borderRadius: '4px',
+          }}
+        >
+          Cancelar
+        </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p style={{ marginTop: '10px', textAlign: 'center' }}>{message}</p>}
     </div>
   );
 }
