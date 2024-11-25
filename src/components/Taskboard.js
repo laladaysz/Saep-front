@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useDrop } from "react-dnd";
-import TaskCard from "./Taskcard"; // Corrigido nome do import
+import TaskCard from "./Taskcard";
+import TaskModal from "./TaskModal";
 import "./TaskBoard.css";
 
 function TaskBoard() {
@@ -10,6 +11,8 @@ function TaskBoard() {
     emAndamento: [],
     concluido: [],
   });
+  const [isModalOpen, setIsModalOpen] = useState(false); // Controla a abertura do modal
+  const [taskToEdit, setTaskToEdit] = useState(null); // Tarefa que será editada
 
   // Função para buscar as tarefas
   const fetchTarefas = async () => {
@@ -17,7 +20,6 @@ function TaskBoard() {
       const response = await axios.get("http://127.0.0.1:8000/api/tarefa/todas/");
       const allTarefas = response.data;
 
-      // Organize tasks by their status
       const pendente = allTarefas.filter((tarefa) => tarefa.status === "Pendente");
       const emAndamento = allTarefas.filter((tarefa) => tarefa.status === "Em Andamento");
       const concluido = allTarefas.filter((tarefa) => tarefa.status === "Concluído");
@@ -32,12 +34,9 @@ function TaskBoard() {
     fetchTarefas();
   }, []);
 
-  // Função para deletar a tarefa
   const onTaskDeleted = (taskId) => {
-    // Remove the deleted task from the list
     setTarefas((prevTarefas) => {
       const newTarefas = { ...prevTarefas };
-      // Remove the task from each status category
       newTarefas.pendente = newTarefas.pendente.filter((tarefa) => tarefa.id !== taskId);
       newTarefas.emAndamento = newTarefas.emAndamento.filter((tarefa) => tarefa.id !== taskId);
       newTarefas.concluido = newTarefas.concluido.filter((tarefa) => tarefa.id !== taskId);
@@ -46,11 +45,9 @@ function TaskBoard() {
   };
 
   const onUpdateStatus = (id, newStatus) => {
-    // Request to update the status of the task in the backend
     axios
       .patch(`http://127.0.0.1:8000/api/tarefa/alterar_status/${id}/`, { status: newStatus })
       .then(() => {
-        // Re-fetch tasks after updating the status
         fetchTarefas();
       })
       .catch((error) => {
@@ -65,14 +62,16 @@ function TaskBoard() {
   const renderTarefas = (tasks) =>
     tasks.map((tarefa) => (
       <TaskCard
-      key={tarefa.id}
-      tarefa={tarefa}
-      statusColumn={tarefa.status}  // Passando o status para o TaskCard
-      onTaskDeleted={onTaskDeleted} // Passando a função de exclusão
-    />
+        key={tarefa.id}
+        tarefa={tarefa}
+        onTaskDeleted={onTaskDeleted}
+        onTaskEdited={(tarefa) => {
+          setTaskToEdit(tarefa);  // Passa a tarefa a ser editada para o estado
+          setIsModalOpen(true);    // Abre o modal de edição
+        }}
+      />
     ));
 
-  // Drop handlers for each column
   const [, dropPendente] = useDrop({
     accept: "TASK",
     drop: (item) => moveTaskToColumn(item, "Pendente"),
@@ -87,6 +86,11 @@ function TaskBoard() {
     accept: "TASK",
     drop: (item) => moveTaskToColumn(item, "Concluído"),
   });
+
+  const closeModal = () => {
+    setIsModalOpen(false); // Fecha o modal
+    setTaskToEdit(null);    // Limpa a tarefa a ser editada
+  };
 
   return (
     <div className="taskboard-container">
@@ -104,6 +108,14 @@ function TaskBoard() {
         <h3>Concluído</h3>
         {renderTarefas(tarefas.concluido)}
       </div>
+
+      {isModalOpen && (
+        <TaskModal
+          tarefa={taskToEdit}
+          onClose={closeModal}
+          onTaskUpdated={fetchTarefas}  // Recarrega as tarefas ao atualizar
+        />
+      )}
     </div>
   );
 }
