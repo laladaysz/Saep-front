@@ -36,3 +36,29 @@
     color: #007bff; /* Cor para links ou dados interativos */
   }
   
+
+  .task-card-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .task-card-actions button {
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    background-color: #ff4d4d; /* Cor vermelha para excluir */
+    color: white;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+  }
+  
+  .task-card-actions button:hover {
+    background-color: #ff1a1a; /* Cor de hover */
+  }
+  
+  .task-card-actions button:active {
+    background-color: #e60000; /* Cor de clique */
+  }
+  

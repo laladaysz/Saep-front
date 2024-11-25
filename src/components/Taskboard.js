@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useDrop } from "react-dnd";
-import TaskCard from "./Taskcard";
+import TaskCard from "./Taskcard"; // Corrigido nome do import
 import "./TaskBoard.css";
 
 function TaskBoard() {
@@ -11,7 +11,7 @@ function TaskBoard() {
     concluido: [],
   });
 
-  // Define fetchTarefas outside useEffect to make it accessible to other functions
+  // Função para buscar as tarefas
   const fetchTarefas = async () => {
     try {
       const response = await axios.get("http://127.0.0.1:8000/api/tarefa/todas/");
@@ -31,6 +31,19 @@ function TaskBoard() {
   useEffect(() => {
     fetchTarefas();
   }, []);
+
+  // Função para deletar a tarefa
+  const onTaskDeleted = (taskId) => {
+    // Remove the deleted task from the list
+    setTarefas((prevTarefas) => {
+      const newTarefas = { ...prevTarefas };
+      // Remove the task from each status category
+      newTarefas.pendente = newTarefas.pendente.filter((tarefa) => tarefa.id !== taskId);
+      newTarefas.emAndamento = newTarefas.emAndamento.filter((tarefa) => tarefa.id !== taskId);
+      newTarefas.concluido = newTarefas.concluido.filter((tarefa) => tarefa.id !== taskId);
+      return newTarefas;
+    });
+  };
 
   const onUpdateStatus = (id, newStatus) => {
     // Request to update the status of the task in the backend
@@ -52,11 +65,11 @@ function TaskBoard() {
   const renderTarefas = (tasks) =>
     tasks.map((tarefa) => (
       <TaskCard
-        key={tarefa.id}
-        tarefa={tarefa}
-        statusColumn={tarefa.status}
-        onUpdateStatus={onUpdateStatus}
-      />
+      key={tarefa.id}
+      tarefa={tarefa}
+      statusColumn={tarefa.status}  // Passando o status para o TaskCard
+      onTaskDeleted={onTaskDeleted} // Passando a função de exclusão
+    />
     ));
 
   // Drop handlers for each column

@@ -3,10 +3,10 @@ import { useDrag } from "react-dnd";
 import axios from "axios";
 import "./TaskCard.css";
 
-const TaskCard = ({ tarefa, statusColumn }) => {
+const TaskCard = ({ tarefa, onTaskDeleted }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "TASK",
-    item: { id: tarefa.id, status: statusColumn },
+    item: { id: tarefa.id, status: tarefa.status }, // Passando o status correto
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -32,6 +32,18 @@ const TaskCard = ({ tarefa, statusColumn }) => {
     }
   }, [tarefa.user]);
 
+  const handleDelete = async () => {
+    try {
+      // Faz a requisição para deletar a tarefa, com o endpoint correto
+      await axios.delete(`http://127.0.0.1:8000/api/tarefa/excluir/${tarefa.id}/`);
+      
+      // Chama a função onTaskDeleted (passada como prop) para remover a tarefa da lista no componente pai
+      onTaskDeleted(tarefa.id);  
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
+    }
+  };
+
   return (
     <div
       ref={drag}
@@ -49,6 +61,10 @@ const TaskCard = ({ tarefa, statusColumn }) => {
       <p>
         <strong>Responsável:</strong> {responsavel}
       </p>
+
+      <div className="task-card-actions">
+        <button onClick={handleDelete}>Excluir</button>
+      </div>
     </div>
   );
 };
